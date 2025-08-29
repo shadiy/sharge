@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{.Title}}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link href="/output.css" rel="stylesheet" />
+    <script src="/static/upload.js" defer></script>
+    <script src="/static/htmx.min.js"></script>
+  </head>
+  <body class="min-h-screen">
+    <div hx-get="/header" hx-swap="outerHTML" hx-trigger="load"></div>
+    <main
+      id="drop"
+      class="min-h-screen md:ml-64 p-4 flex flex-col items-center"
+    >
+      <section class="w-full mb-8">
+        <div class="overflow-x-auto pt-4">
+          <span class="px-3 py-1 rounded-full mx-auto text-sm border">
+            Max {{.MaxMB}} MB
+          </span>
+          <table class="w-full text-left border mt-4">
+            <thead>
+              <tr class="border">
+                <th class="py-3 px-4 font-bold">Name</th>
+                <th class="py-3 px-4 font-bold">Status</th>
+                <th class="py-3 px-4 font-bold">Progress</th>
+                <th class="py-3 px-4 font-bold"></th>
+              </tr>
+            </thead>
+            <tbody id="queue">
+              <tr class="border-b">
+                <td class="py-3 px-4" colspan="4">
+                  <label
+                    class="underline font-semibold cursor-pointer flex gap-2"
+                  >
+                    <input id="pick" type="file" multiple hidden />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="w-6 h-6"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 4.5v15m7.5-7.5h-15"
+                      />
+                    </svg>
+
+                    Click to Browse or Drag & Drop Files
+                  </label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script>
+      window.MAX_MB = {{.MaxMB }};
+    </script>
+  </body>
+</html>

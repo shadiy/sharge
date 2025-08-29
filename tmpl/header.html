@@ -1,0 +1,80 @@
+<button
+  type="button"
+  id="sidebar-button"
+  class="inline-flex items-center p-2 mt-2 ms-3 text-sm rounded-lg sm:hidden hover:bg-st focus:outline-none focus:ring-2 focus:ring-gray-200"
+>
+  <span class="sr-only">Open sidebar</span>
+  <svg
+    class="w-6 h-6"
+    aria-hidden="true"
+    fill="currentColor"
+    viewBox="0 0 20 20"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      clip-rule="evenodd"
+      fill-rule="evenodd"
+      d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+    ></path>
+  </svg>
+</button>
+
+<aside
+  class="h-screen w-64 -translate-x-full transition-transform fixed top-0 left-0 z-40 border-r overflow-y-auto px-4 py-2 bg-[#262626] sm:translate-x-0"
+  id="sidebar"
+>
+  <ul class="space-y-2 font-medium overflow-y-auto">
+    <li class="flex items-center gap-2">
+      <img src="/icons/folder.svg" alt="folder" class="w-10 h-10" />
+      <h1 class="text-2xl font-bold tracking-wide m-0">Sharge</h1>
+    </li>
+    <li class="py-2 px-4 rounded-lg hover:bg-stone-600 transition-colors">
+      <a href="/" class="flex">Files </a>
+    </li>
+    <li class="py-2 px-4 rounded-lg hover:bg-stone-600 transition-colors">
+      <a href="/upload" class="flex">Upload</a>
+    </li>
+    <li
+      class="py-2 px-4 rounded-lg bg-red-500/80 hover:bg-red-500/90 transition-colors"
+    >
+      <a href="/logout" class="flex">Logout</a>
+    </li>
+    <li class="fixed bottom-2">
+      <small class="text-xs">
+        Served at {{.Now.Format "2006-01-02 15:04:05"}}
+      </small>
+    </li>
+  </ul>
+</aside>
+
+<script defer>
+  const drawerBtn = document.getElementById("sidebar-button");
+  const sidebar = document.getElementById("sidebar");
+
+  // Toggle sidebar on button click
+  drawerBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    sidebar.classList.toggle("-translate-x-full");
+  });
+
+  // Hide sidebar when clicking outside (on small screens)
+  document.addEventListener("click", function (e) {
+    if (
+      !sidebar.classList.contains("-translate-x-full") &&
+      window.innerWidth < 640 && // sm breakpoint
+      !sidebar.contains(e.target) &&
+      e.target !== drawerBtn
+    ) {
+      sidebar.classList.add("-translate-x-full");
+    }
+  });
+
+  // Optional: Hide sidebar on resize to small screens
+  window.addEventListener("resize", function () {
+    if (window.innerWidth >= 640) {
+      sidebar.classList.remove("-translate-x-full");
+    } else {
+      sidebar.classList.add("-translate-x-full");
+    }
+  });
+</script>

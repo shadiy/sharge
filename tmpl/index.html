@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{.Title}}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link href="/output.css" rel="stylesheet" />
+    <script src="/static/htmx.min.js"></script>
+    <script src="/static/toast.js" defer></script>
+    <script src="/static/filetree.js" defer></script>
+  </head>
+  <body class="min-h-screen">
+    <div hx-get="/header" hx-swap="outerHTML" hx-trigger="load"></div>
+
+    <main class="md:ml-64 p-4 flex flex-col items-center">
+      <section class="w-full mb-8">
+        <div class="overflow-x-auto">
+          <h1 class="text-4xl mb-8">Files</h1>
+          <div></div>
+          <!-- id="files" hx-swap="innerHTML" hx-trigger="load" hx-get="/files" -->
+
+          <div class="flex gap-4 mb-4" id="filetree-actions">
+            <a
+              id="filetree-open"
+              href="#"
+              target="_blank"
+              class="bg-amber-400 hover:bg-amber-500 text-black px-4 py-2 rounded cursor-pointer"
+            >
+              View
+            </a>
+            <a
+              id="filetree-download"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+            >
+              Download
+            </a>
+            <button
+              id="filetree-delete"
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer"
+              disabled
+            >
+              Delete
+            </button>
+            <br />
+            <a
+              id="filetree-mkdir"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+            >
+              Create Folder
+            </a>
+            <button
+              id="filetree-rename"
+              class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer"
+              disabled
+            >
+              Rename
+            </button>
+          </div>
+          <style>
+            ul.file-tree {
+              list-style: none;
+              padding-left: 0;
+            }
+            ul.file-tree ul {
+              padding-left: 1.5em;
+              border-left: 1px solid #e5e7eb;
+              margin-left: 0.5em;
+            }
+            .filetree-selected {
+              background: #5b5b5c;
+            }
+          </style>
+
+          {{define "fileTree"}}
+          <ul class="file-tree">
+            {{range .}}
+            <li class="file-tree-entry mb-1" data-path="{{.Path}}">
+              <div class="flex items-center hover:bg-white/10">
+                {{if .IsDir}}
+                <details class="w-full">
+                  <summary class="flex items-center cursor-pointer select-none">
+                    <img
+                      src="/icons/folder.svg"
+                      alt="folder"
+                      class="inline w-4 h-4 mr-1"
+                    />
+                    <span class="font-bold text-orange-400">{{.Name}}</span>
+                  </summary>
+                  {{template "fileTree" .Children}}
+                </details>
+                {{else}}
+                <img
+                  src="/icons/file.svg"
+                  alt="file"
+                  class="inline w-4 h-4 mr-1"
+                />
+                <span>{{.Name}}</span>
+                <span class="ml-2 text-xs text-gray-500">{{.Size}}</span>
+                <span class="ml-2 text-xs text-gray-400">
+                  {{.Modified.Format "2006-01-02 15:04:05"}}
+                </span>
+                {{end}}
+              </div>
+            </li>
+            {{end}}
+          </ul>
+          {{end}} {{template "fileTree" .Files}}
+        </div>
+      </section>
+    </main>
+
+    <div
+      id="rename-modal"
+      class="hidden fixed z-50 inset-0 w-screen h-screen bg-black/30 items-center justify-center"
+    >
+      <div
+        class="bg-[#262626] p-8 rounded-lg min-w-80 max-w-full shadow-sm flex flex-col gap-4"
+      >
+        <div class="font-bold text-lg">Rename</div>
+        <div class="text-sm text-gray-400 break-all">Absolute Path</div>
+        <div
+          id="rename-modal-path"
+          class="text-sm text-gray-400 break-all"
+        ></div>
+        <input
+          id="rename-modal-input"
+          type="text"
+          class="p-2 text-base w-full box-border border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <div class="flex gap-4 justify-end">
+          <button
+            id="rename-modal-cancel"
+            type="button"
+            class="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            id="rename-modal-apply"
+            type="button"
+            class="bg-blue-600 text-white border-none px-5 py-2 rounded hover:bg-blue-700"
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="mkdir-modal"
+      class="hidden fixed z-50 inset-0 w-screen h-screen bg-black/30 items-center justify-center"
+    >
+      <div
+        class="bg-[#262626] p-8 rounded-lg min-w-80 max-w-full shadow-sm flex flex-col gap-4"
+      >
+        <div class="font-bold text-lg">Rename</div>
+        <div id="mkdir-modal-path" class="text-sm text-gray-400 break-all">
+          Absolute Path
+        </div>
+        <input
+          id="mkdir-modal-input"
+          type="text"
+          class="p-2 text-base w-full box-border border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <div class="flex gap-4 justify-end">
+          <button
+            id="mkdir-modal-cancel"
+            type="button"
+            class="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            id="mkdir-modal-apply"
+            type="button"
+            class="bg-blue-600 text-white border-none px-5 py-2 rounded hover:bg-blue-700"
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="toast-container"
+      class="fixed right-3 bottom-3 flex flex-col justify-end z-50 w-80 min-h-screen gap-4"
+    ></div>
+  </body>
+</html>
